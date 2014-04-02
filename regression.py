@@ -27,6 +27,11 @@ class Regression(object):
 
         return subs_x, subs_y
 
+    def __regression(self, x, y):
+        a = np.vstack([x, np.ones(len(x))]).T
+        m, c = np.linalg.lstsq(a, y)[0]
+        return m, c
+
     def analyze(self, steps=list(range(1, 10, 1))):
         """
         Perform series of regression changing the number of data samples used.
@@ -34,13 +39,12 @@ class Regression(object):
         @param steps List with number of samples to use
         @return Z matrix with gradient(n_samples, x_data)
         """
-        Z = np.zeros((len(steps), self.len))
+        Z = np.ones((len(steps), self.len))*np.nan
 
         for i, step in enumerate(steps):
             subs_x, subs_y = self.__get_slices(step)
             for j, (sub_x, sub_y) in enumerate(zip(subs_x, subs_y)):
-                a = np.vstack([sub_x, np.ones(len(sub_x))]).T
-                m, c = np.linalg.lstsq(a, sub_y)[0]
+                m, c = self.__regression(sub_x, sub_y)
                 Z[i, j] = m
 
         return Z
