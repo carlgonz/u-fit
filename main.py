@@ -1,9 +1,11 @@
 import os
+import sys
 import numpy as np
 from mayavi.mlab import surf, show, figure, axes
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+sys.path.append("src/python/modules")
 from regression import *
 
 

@@ -8,7 +8,7 @@ class Regression(object):
         """
         self.x = x
         self.y = y
-        self.len = len(self.y)
+        self.len = len(self.x)
 
     def __get_slices(self, step):
         """
@@ -48,3 +48,21 @@ class Regression(object):
                 Z[i, j] = m
 
         return Z
+
+    def regression(self, percentil):
+        step = int(self.len*percentil/100)
+        subs_x, subs_y = self.__get_slices(step)
+        list_m = []
+        list_c = []
+
+        for (sub_x, sub_y) in zip(subs_x, subs_y):
+            m, c = self.__regression(sub_x, sub_y)
+            list_m.append(m)
+            list_c.append(c)
+
+        i = np.argmax(list_m)
+        c_value = list_c[i]
+        m_value = list_m[i]
+
+        return [m_value, c_value]
+
