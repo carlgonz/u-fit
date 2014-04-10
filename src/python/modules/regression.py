@@ -60,9 +60,9 @@ class Regression(object):
             list_m.append(m)
             list_c.append(c)
 
-        i = np.argmax(list_m)
+        i = np.argmin(list_m)
         c_value = list_c[i]
         m_value = list_m[i]
 
-        return [m_value, c_value]
+        return [m_value, c_value, i, step]
 

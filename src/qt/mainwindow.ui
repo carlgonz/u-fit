@@ -29,19 +29,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
      </layout>
     </item>
     <item row="0" column="1">
@@ -52,10 +39,16 @@
       <item>
        <widget class="QGroupBox" name="settings_group">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="baseSize">
+         <size>
+          <width>300</width>
+          <height>0</height>
+         </size>
         </property>
         <property name="title">
          <string>Settings</string>
@@ -66,13 +59,13 @@
            <property name="text">
             <string>Datafile</string>
            </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
            <property name="buddy">
             <cstring>datafile_line</cstring>
            </property>
           </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="datafile_line"/>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="datasize_label">
@@ -84,14 +77,14 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="2">
+         <item row="0" column="3">
           <widget class="QPushButton" name="datafile_button">
            <property name="text">
             <string>...</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1" colspan="2">
+         <item row="1" column="2" colspan="2">
           <widget class="QSlider" name="datasize_slider">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -99,14 +92,17 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
            <property name="maximum">
             <number>100</number>
            </property>
            <property name="pageStep">
-            <number>10</number>
+            <number>5</number>
            </property>
            <property name="value">
-            <number>10</number>
+            <number>25</number>
            </property>
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -122,20 +118,39 @@
            </property>
           </widget>
          </item>
+         <item row="0" column="1" colspan="2">
+          <widget class="QLineEdit" name="datafile_line"/>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSpinBox" name="datasize_spinbox">
+           <property name="suffix">
+            <string>%</string>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>100</number>
+           </property>
+           <property name="value">
+            <number>25</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1" colspan="3">
+          <widget class="QPushButton" name="update_button">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Update</string>
+           </property>
+          </widget>
+         </item>
         </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="update_button">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Update</string>
-        </property>
        </widget>
       </item>
       <item>
@@ -215,7 +230,6 @@
   <tabstop>datafile_line</tabstop>
   <tabstop>datafile_button</tabstop>
   <tabstop>datasize_slider</tabstop>
-  <tabstop>update_button</tabstop>
   <tabstop>plot_webview</tabstop>
  </tabstops>
  <resources/>
@@ -249,6 +263,38 @@
     <hint type="destinationlabel">
      <x>706</x>
      <y>130</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>datasize_spinbox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>datasize_slider</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>676</x>
+     <y>96</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>721</x>
+     <y>95</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>datasize_slider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>datasize_spinbox</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>738</x>
+     <y>104</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>645</x>
+     <y>89</y>
     </hint>
    </hints>
   </connection>
