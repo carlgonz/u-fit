@@ -3,8 +3,10 @@ __author__ = 'cgonzalez'
 import sys
 import os
 import plotly
+import pygal
 import numpy as np
 from modules import regression
+from pygal.style import RedBlueStyle as PlotStyle
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -21,7 +23,6 @@ class Main(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self)
 
         #Instance variables
-        self._plotly = plotly.plotly("cgnozalez", "nu091rxas4")
         self.x = []
         self.y = []
 
@@ -33,12 +34,6 @@ class Main(QtGui.QMainWindow):
         self.ui.update_button.clicked.connect(self.update_plot)
         self.ui.datafile_button.clicked.connect(self.select_file)
 
-        self.ui.statusbar.showMessage("Connecting...", 10000)
-
-        plot_html = self._plotly.iplot(self.x, self.y, filename='_',
-                                       overwrite=True)
-        self.ui.plot_webview.setContent(plot_html)
-
     def select_file(self):
         filename = QtGui.QFileDialog.getOpenFileName(self, "Open datafile",
                                                      QtCore.QDir.currentPath(),
@@ -49,9 +44,14 @@ class Main(QtGui.QMainWindow):
         self.ui.datafile_line.setText(filename)
 
     def load_data(self, filename, cols=(1, 2)):
-        data = np.loadtxt(filename, delimiter=',', skiprows=1, usecols=cols)
-        self.x = data[:, 0]
-        self.y = data[:, 1]
+        try:
+            data = np.loadtxt(filename, delimiter=',', skiprows=1, usecols=cols)
+            self.x = data[:, 0]
+            self.y = data[:, 1]
+        except FileNotFoundError:
+            self.x = []
+            self.y = []
+            self.ui.statusbar.showMessage("File not found.", 5000)
 
     def adjust(self):
         reg = regression.Regression(self.x, self.y)
@@ -62,45 +62,43 @@ class Main(QtGui.QMainWindow):
         datafile = self.ui.datafile_line.text()
         self.load_data(datafile)
 
-        [m, c, i, step] = self.adjust()
+        if (len(self.x) == 0) or (len(self.y) == 0):
+            return
+
+        try:
+            [m, c, r, i, step] = self.adjust()
+
+        except Exception:
+            self.ui.statusbar.showMessage("Error, please try again.", 2000)
+            return
 
         status = "m:{0}, c:{1}, i:{2}, step:{3}".format(m, c, i, step)
         self.ui.statusbar.showMessage("Done. "+status+". Loading graph...",
                                       10000)
 
         y_adj = [c, self.x[0]*m+c, self.x[-1]*m+c]
+        x_adj = [0, self.x[0], self.x[-1]]
 
-        text_result = "f(x)={0:.2}*x{1:+.2}".format(m, c)
+        text_result = "f(x) = {0:.2}*x{1:+.2}".format(m, c)
+        r2 = "R2 = {0:.2}".format(r)
 
-        scatter = {'x': self.x,
-                   'y': self.y,
-                   'name': 'Experimental data',
-                   'type': 'scatter',
-                   'mode': 'markers'}
+        plot = pygal.XY(stroke=True, style=PlotStyle, disable_xml_declaration=True)
+        plot.title = os.path.basename(datafile)
+        plot.x_title = 'Shear rate'
+        plot.y_title = 'Shear stress'
+        plot.legend_at_bottom = True
+        plot.config.css.append('../css/base-new.css')
 
-        used = {'x': self.x[i:i+step],
-                   'y': self.y[i:i+step],
-                   'name': 'Used data',
-                   'type': 'scatter',
-                   'mode': 'markers'}
+        plot.add('Experimental data', [(x, y) for x, y in zip(self.x, self.y)])
+        plot.add('Fit {0} ({1})'.format(text_result, r2), [(x, y) for x, y in zip(x_adj, y_adj)])
+        plot.add('Used data', [(x, y) for x, y in zip(self.x[i:i+step], self.y[i:i+step])])
+        plot_html = plot.render()
 
-        adjust = {'x': [0, self.x[0], self.x[-1]],
-                  'y': y_adj,
-                  'name': 'Fit: '+text_result,
-                  'type': 'scatter',
-                  'mode': 'lines'}
+        page_html = "<!DOCTYPE html><html><head><script type=\"text/javascript\" src=\"http://kozea.github.com/pygal.js/javascripts/svg.jquery.js\"></script><script type=\"text/javascript\" src=\"http://kozea.github.com/pygal.js/javascripts/pygal-tooltips.js\"></script></head><body>"\
+                    ""+plot_html+""\
+                    "</body></html>"
 
-        layout = {'xaxis': {'title': 'Shear rate'},
-                  'yaxis': {'title': 'Shear stress'},
-                  'title': os.path.basename(datafile),
-                  'legend': {'x': 0, 'y': 1, 'opacity': 0.4}}
-
-        plot_html = self._plotly.iplot([scatter, used, adjust], layout=layout,
-                                       filename=os.path.basename(datafile),
-                                       fileopt='overwrite',
-                                       world_readable=True)
-
-        self.ui.plot_webview.setContent(plot_html)
+        self.ui.plot_webview.setContent(page_html)
         self.ui.statusbar.showMessage("Graph loaded.", 5000)
 
 
