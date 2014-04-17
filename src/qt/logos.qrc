@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="&lt;no prefix>">
+    <file>images/logo_alges_w.png</file>
+    <file>images/logo-ALGES.jpg</file>
+  </qresource>
+</RCC>

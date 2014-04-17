@@ -137,7 +137,7 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="1" colspan="3">
+         <item row="2" column="2" colspan="2">
           <widget class="QPushButton" name="update_button">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
@@ -147,6 +147,16 @@
            </property>
            <property name="text">
             <string>Update</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" colspan="2">
+          <widget class="QCheckBox" name="autoupdate_check">
+           <property name="text">
+            <string>Auto update</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -193,17 +203,24 @@
      <string>Help</string>
     </property>
     <addaction name="about_action"/>
+    <addaction name="aboutalges_action"/>
    </widget>
    <addaction name="file_menu"/>
    <addaction name="help_menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="new_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>New</string>
    </property>
   </action>
   <action name="open_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Open</string>
    </property>
@@ -216,6 +233,11 @@
   <action name="about_action">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="aboutalges_action">
+   <property name="text">
+    <string>About ALGES</string>
    </property>
   </action>
  </widget>
