@@ -35,7 +35,7 @@ class Regression(object):
         m, c, r, p, std = stats.linregress(x,y)
         return m, c, r**2
 
-    def analyze(self, steps=list(range(1, 10, 1))):
+    def analyze(self, steps=list(range(2, 10, 1))):
         """
         Perform series of regression changing the number of data samples used.
 
@@ -51,6 +51,47 @@ class Regression(object):
                 Z[i, j] = m
 
         return Z
+
+    def optimization(self, alpha=0.5, steps=list(range(2, 10, 1))):
+        list_m = []
+        list_c = []
+        list_r = []
+        list_dr = []
+
+        for i, step in enumerate(steps):
+            _list_r = []
+            subs_x, subs_y = self.__get_slices(step)
+
+            for (sub_x, sub_y) in zip(subs_x, subs_y):
+                m, c, r = self.__regression(sub_x, sub_y)
+                list_m.append(m)
+                list_c.append(c)
+                _list_r.append(r)
+                list_r.append(r)
+
+            list_dr.extend(np.gradient(_list_r).tolist())
+
+        _list_m = np.where(np.array(list_m) >= 0, np.array(list_m), 10**10)
+        _list_dr = np.absolute(np.array(list_dr))
+
+        f_obj = alpha*_list_m+(1-alpha)*_list_dr
+
+        i_op = np.argmin(f_obj)
+        f_op = f_obj[i_op]
+        m_op = list_m[i_op]
+        c_op = list_c[i_op]
+        r_op = list_r[i_op]
+
+        # print("Params:", i_op, f_op, m_op, c_op, r_op, list_dr[i_op])
+        # print("Obj: ", len(f_obj.tolist()), f_obj.tolist())
+        # print("R : ", len(list_r), list_r)
+        # print("dR: ", len(list_dr), list_dr)
+        # print("M : ", len(list_m), list_m)
+        #
+        # X = np.vstack((f_obj.tolist(), list_m, list_r, list_dr)).T
+        # np.savetxt("fit.csv", X, delimiter=',')
+
+        return i_op, f_op, m_op, c_op, r_op
 
     def regression(self, percentil):
         step = int(self.len*percentil/100)

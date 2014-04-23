@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'about_alges.ui'
 #
-# Created: Thu Apr 17 17:35:33 2014
+# Created: Wed Apr 23 18:47:44 2014
 #      by: PyQt4 UI code generator 4.8.6
 #
 # WARNING! All changes made in this file will be lost!

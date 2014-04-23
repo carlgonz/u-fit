@@ -34,9 +34,16 @@ class Main(QtGui.QMainWindow):
         #Signals
         self.ui.update_button.clicked.connect(self.manualupdate_plot)
         self.ui.datafile_button.clicked.connect(self.select_file)
-        self.ui.datasize_spinbox.valueChanged.connect(self.autoupdate_plot)
         self.ui.about_action.triggered.connect(self.show_about)
         self.ui.aboutalges_action.triggered.connect(self.show_about_alges)
+
+        self.ui.datasize_spinbox.valueChanged.connect(self.autoupdate_plot)
+        self.ui.alpha_spinbox.valueChanged.connect(self.autoupdate_plot)
+        self.ui.datasize_check.toggled.connect(self.autoupdate_plot)
+
+        self.ui.alpha_spinbox.valueChanged.connect(lambda x: self.ui.alpha_slider.setValue(int(x*1000)))
+        self.ui.alpha_slider.valueChanged.connect(lambda x: self.ui.alpha_spinbox.setValue(float(x/1000)))
+
 
     def select_file(self):
         """
@@ -82,6 +89,23 @@ class Main(QtGui.QMainWindow):
         percentil = self.ui.datasize_spinbox.value()
         return reg.regression(percentil)
 
+    def optimal_fit(self):
+        """
+        Performs the optimal lineal regression.
+        Returns:
+        m - Slope or gradient
+        c - Intercept
+        r - Correlation coefficient
+        i - Index of sub-sample first element
+        len - Lenght of sub-sample
+        """
+        reg = regression.Regression(self.x, self.y)
+        slc = list(range(5, 60, 2))
+        alp = self.ui.alpha_spinbox.value()
+        i_op, f_op, m_op, c_op, r_op = reg.optimization(alpha=alp, steps=slc)
+        return m_op, c_op, r_op, i_op, f_op
+
+
     def autoupdate_plot(self, value):
         """
         Auto update plot slot
@@ -105,10 +129,14 @@ class Main(QtGui.QMainWindow):
             return
 
         try:
-            [m, c, r, i, step] = self.adjust()
+            if self.ui.datasize_check.isChecked():
+                [m, c, r, i, step] = self.adjust()
+            else:
+                [m, c, r, i, step] = self.optimal_fit()
 
-        except Exception:
+        except Exception as e:
             self.ui.statusbar.showMessage("Error, please try again.", 2000)
+            print(e)
             return
 
         y_adj = [c, self.x[0]*m+c, self.x[-1]*m+c]
@@ -128,7 +156,7 @@ class Main(QtGui.QMainWindow):
 
         plot.add('Experimental data', [(x, y) for x, y in zip(self.x, self.y)])
         plot.add('Fit {0}'.format(str_fit), [(x, y) for x, y in zip(x_adj, y_adj)])
-        plot.add('Used data', [(x, y) for x, y in zip(self.x[i:i+step], self.y[i:i+step])])
+        # plot.add('Used data', [(x, y) for x, y in zip(self.x[i:i+step], self.y[i:i+step])])
         plot_html = plot.render()
 
         page_html = self.__get_page(plot_html)
