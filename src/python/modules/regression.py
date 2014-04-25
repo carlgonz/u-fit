@@ -9,7 +9,16 @@ class Regression(object):
         """
         self.x = x
         self.y = y
+        self.list_m = []
+        self.list_c = []
+        self.list_r = []
+        self.list_dr = []
+        self.list_i = []
         self.len = len(self.x)
+        self.last = "none"
+        self.alpha = None
+        self.steps = None
+        self.window = None
 
     def __get_slices(self, step):
         """
@@ -53,34 +62,43 @@ class Regression(object):
         return Z
 
     def optimization(self, alpha=0.5, steps=list(range(2, 10, 1))):
-        list_m = []
-        list_c = []
-        list_r = []
-        list_dr = []
+        if (self.last != "opt") or (self.steps != steps):
+            self.steps = steps
+            self.alpha = alpha
+            self.list_m = []
+            self.list_c = []
+            self.list_r = []
+            self.list_dr = []
+            self.list_i = []
 
-        for i, step in enumerate(steps):
-            _list_r = []
-            subs_x, subs_y = self.__get_slices(step)
+            for i, step in enumerate(steps):
+                _list_r = []
+                subs_x, subs_y = self.__get_slices(step)
 
-            for (sub_x, sub_y) in zip(subs_x, subs_y):
-                m, c, r = self.__regression(sub_x, sub_y)
-                list_m.append(m)
-                list_c.append(c)
-                _list_r.append(r)
-                list_r.append(r)
+                for j, (sub_x, sub_y) in enumerate(zip(subs_x, subs_y)):
+                    m, c, r = self.__regression(sub_x, sub_y)
+                    self.list_m.append(m)
+                    self.list_c.append(c)
+                    self.list_r.append(r)
+                    self.list_i.append((j, step))
+                    _list_r.append(r)
 
-            list_dr.extend(np.gradient(_list_r).tolist())
+                self.list_dr.extend(np.gradient(_list_r).tolist())
 
-        _list_m = np.where(np.array(list_m) >= 0, np.array(list_m), 10**10)
-        _list_dr = np.absolute(np.array(list_dr))
+            self.list_dr = np.absolute(np.array(self.list_dr))
+            self.list_m = np.where(np.array(self.list_m) >= 0,
+                                   np.array(self.list_m), 10**10)
 
-        f_obj = alpha*_list_m+(1-alpha)*_list_dr
+            self.last = "opt"
 
+        f_obj = alpha*self.list_m + (1-alpha)*self.list_dr
         i_op = np.argmin(f_obj)
-        f_op = f_obj[i_op]
-        m_op = list_m[i_op]
-        c_op = list_c[i_op]
-        r_op = list_r[i_op]
+        # print(len(f_obj), i_op)
+        m_op = self.list_m[i_op]
+        c_op = self.list_c[i_op]
+        r_op = self.list_r[i_op]
+        i, step = self.list_i[i_op]
+        # f_op = self.f_obj[i_op]
 
         # print("Params:", i_op, f_op, m_op, c_op, r_op, list_dr[i_op])
         # print("Obj: ", len(f_obj.tolist()), f_obj.tolist())
@@ -91,25 +109,38 @@ class Regression(object):
         # X = np.vstack((f_obj.tolist(), list_m, list_r, list_dr)).T
         # np.savetxt("fit.csv", X, delimiter=',')
 
-        return i_op, f_op, m_op, c_op, r_op
+        return [m_op, c_op, r_op, i, step]
 
-    def regression(self, percentil):
-        step = int(self.len*percentil/100)
-        subs_x, subs_y = self.__get_slices(step)
-        list_m = []
-        list_c = []
-        list_r = []
+    def regression(self, percentil, alpha=1.0):
+        if (self.last != "reg") or (self.window != percentil):
+            self.window = percentil
+            self.alpha = alpha
 
-        for (sub_x, sub_y) in zip(subs_x, subs_y):
-            m, c, r = self.__regression(sub_x, sub_y)
-            list_m.append(m)
-            list_c.append(c)
-            list_r.append(r)
+            step = int(self.len*percentil/100)
+            subs_x, subs_y = self.__get_slices(step)
+            self.list_m = []
+            self.list_c = []
+            self.list_r = []
 
-        i = np.argmin(list_m)
-        c_value = list_c[i]
-        m_value = list_m[i]
-        r_value = list_r[i]
+            for (sub_x, sub_y) in zip(subs_x, subs_y):
+                m, c, r = self.__regression(sub_x, sub_y)
+                self.list_m.append(m)
+                self.list_c.append(c)
+                self.list_r.append(r)
+
+            self.list_dr = np.gradient(self.list_r)
+            self.list_dr = np.absolute(np.array(self.list_dr))
+            self.list_m = np.where(np.array(self.list_m) >= 0,
+                                   np.array(self.list_m), 10**3)
+
+            self.last = "reg"
+
+        f_obj = alpha*self.list_m + (1-alpha)*self.list_dr
+        i = np.argmin(f_obj)
+        c_value = self.list_c[i]
+        m_value = self.list_m[i]
+        r_value = self.list_r[i]
+        step = int(self.len*self.window/100)
 
         return [m_value, c_value, r_value, i, step]
 

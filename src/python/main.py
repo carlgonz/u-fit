@@ -25,6 +25,7 @@ class Main(QtGui.QMainWindow):
         #Instance variables
         self.x = []
         self.y = []
+        self.fit = None
         self.datafile = ""
 
         #UI settings
@@ -43,6 +44,8 @@ class Main(QtGui.QMainWindow):
 
         self.ui.alpha_spinbox.valueChanged.connect(lambda x: self.ui.alpha_slider.setValue(int(x*1000)))
         self.ui.alpha_slider.valueChanged.connect(lambda x: self.ui.alpha_spinbox.setValue(float(x/1000)))
+
+        self.ui.alpha_spinbox.setValue(0.5)
 
 
     def select_file(self):
@@ -75,36 +78,7 @@ class Main(QtGui.QMainWindow):
             self.y = []
             self.ui.statusbar.showMessage("File not found.", 5000)
 
-    def adjust(self):
-        """
-        Performs lineal regression.
-        Returns:
-        m - Slope or gradient
-        c - Intercept
-        r - Correlation coefficient
-        i - Index of sub-sample first element
-        len - Lenght of sub-sample
-        """
-        reg = regression.Regression(self.x, self.y)
-        percentil = self.ui.datasize_spinbox.value()
-        return reg.regression(percentil)
-
-    def optimal_fit(self):
-        """
-        Performs the optimal lineal regression.
-        Returns:
-        m - Slope or gradient
-        c - Intercept
-        r - Correlation coefficient
-        i - Index of sub-sample first element
-        len - Lenght of sub-sample
-        """
-        reg = regression.Regression(self.x, self.y)
-        slc = list(range(5, 60, 2))
-        alp = self.ui.alpha_spinbox.value()
-        i_op, f_op, m_op, c_op, r_op = reg.optimization(alpha=alp, steps=slc)
-        return m_op, c_op, r_op, i_op, f_op
-
+        self.fit = regression.Regression(self.x, self.y)
 
     def autoupdate_plot(self, value):
         """
@@ -129,10 +103,14 @@ class Main(QtGui.QMainWindow):
             return
 
         try:
+            window = self.ui.datasize_spinbox.value()
+            slice = list(range(5, 60, 2))
+            alpha = self.ui.alpha_spinbox.value()
+
             if self.ui.datasize_check.isChecked():
-                [m, c, r, i, step] = self.adjust()
+                [m, c, r, i, step] = self.fit.regression(percentil=window, alpha=alpha)
             else:
-                [m, c, r, i, step] = self.optimal_fit()
+                [m, c, r, i, step] = self.fit.optimization(alpha=alpha, steps=slice)
 
         except Exception as e:
             self.ui.statusbar.showMessage("Error, please try again.", 2000)
@@ -156,7 +134,7 @@ class Main(QtGui.QMainWindow):
 
         plot.add('Experimental data', [(x, y) for x, y in zip(self.x, self.y)])
         plot.add('Fit {0}'.format(str_fit), [(x, y) for x, y in zip(x_adj, y_adj)])
-        # plot.add('Used data', [(x, y) for x, y in zip(self.x[i:i+step], self.y[i:i+step])])
+        plot.add('Used data', [(x, y) for x, y in zip(self.x[i:i+step], self.y[i:i+step])])
         plot_html = plot.render()
 
         page_html = self.__get_page(plot_html)
