@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'about_alges.ui'
 #
-# Created: Wed Apr 23 18:47:44 2014
+# Created: Mon May  5 17:36:16 2014
 #      by: PyQt4 UI code generator 4.8.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -71,4 +71,4 @@ class Ui_AboutAlgesWidget(object):
     def retranslateUi(self, AboutAlgesWidget):
         pass
 
-import logos_rc
+from u_fit import logos_rc

@@ -129,7 +129,7 @@ class Main(QtGui.QMainWindow):
         plot.x_title = 'Shear rate'
         plot.y_title = 'Shear stress'
         plot.legend_at_bottom = True
-        css_dir = os.path.dirname(__file__).replace('src/python', 'src/css')
+        css_dir = os.path.dirname(__file__)+'/data_css'
         plot.config.css.append(css_dir+'/base-new.css')
 
         plot.add('Experimental data', [(x, y) for x, y in zip(self.x, self.y)])
@@ -147,7 +147,7 @@ class Main(QtGui.QMainWindow):
         Returns full html with given body
         """
         # js_dir = "http://kozea.github.com/pygal.js/javascripts"
-        js_dir = "file://"+os.path.dirname(__file__).replace('src/python', 'scr/js')
+        js_dir = "file://"+os.path.dirname(__file__)+'/data_js'
         js1 = js_dir+"/svg.jquery.js"
         js2 = js_dir+"/pygal-tooltips.js"
 

@@ -4,7 +4,9 @@ __author__ = 'cgonzalez'
 
 import sys
 from PyQt4 import QtGui
-from src.python.main import Main
+
+# sys.path.append("src/python/")
+from u_fit.main import Main
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
