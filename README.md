@@ -5,7 +5,7 @@ A tool for automated curve fitting for certain types of experimental data
 
 ![](dist/u-fit.png)
 
-## Install
+## Installation
 **Qt4 and PyQt4 are requiered as dependences**
 
 To install, open a terminal and execute:
