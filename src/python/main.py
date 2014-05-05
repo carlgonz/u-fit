@@ -129,7 +129,7 @@ class Main(QtGui.QMainWindow):
         plot.x_title = 'Shear rate'
         plot.y_title = 'Shear stress'
         plot.legend_at_bottom = True
-        css_dir = os.path.split(__file__)[0].replace('python', 'css')
+        css_dir = os.path.dirname(__file__).replace('src/python', 'src/css')
         plot.config.css.append(css_dir+'/base-new.css')
 
         plot.add('Experimental data', [(x, y) for x, y in zip(self.x, self.y)])
