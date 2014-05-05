@@ -147,7 +147,7 @@ class Main(QtGui.QMainWindow):
         Returns full html with given body
         """
         # js_dir = "http://kozea.github.com/pygal.js/javascripts"
-        js_dir = "file://"+os.path.split(__file__)[0].replace('python', 'js')
+        js_dir = "file://"+os.path.dirname(__file__).replace('src/python', 'scr/js')
         js1 = js_dir+"/svg.jquery.js"
         js2 = js_dir+"/pygal-tooltips.js"
 
